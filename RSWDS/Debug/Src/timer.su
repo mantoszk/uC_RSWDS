@@ -1,0 +1,7 @@
+timer.c:3:6:stopwatch_init	16	static
+timer.c:25:6:stopwatch_free	8	static
+timer.c:45:6:stopwatch_on	16	static
+timer.c:50:6:stopwatch_off	16	static
+timer.c:54:6:is_locked	16	static
+timer.c:58:6:set_stopwatch_blocking_time	16	static
+timer.c:62:6:stopwatch_update	16	static
