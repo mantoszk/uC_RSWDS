@@ -50,6 +50,13 @@
 
 /* Private define ------------------------------------------------------------*/
 
+#define VL53L1X_INT_Pin GPIO_PIN_4
+#define VL53L1X_INT_GPIO_Port GPIOA
+#define VL53L1X_INT_EXTI_IRQn EXTI4_IRQn
+#define VL53L0X_INT_Pin GPIO_PIN_5
+#define VL53L0X_INT_GPIO_Port GPIOA
+#define VL53L0X_INT_EXTI_IRQn EXTI9_5_IRQn
+
 /* ########################## Assert Selection ############################## */
 /**
   * @brief Uncomment the line below to expanse the "assert_param" macro in the 

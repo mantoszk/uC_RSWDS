@@ -1,0 +1,13 @@
+vl53l0x_wrap.c:16:9:VL_init_parameters	56	static
+vl53l0x_wrap.c:92:9:VL_set_interrupt	24	static
+vl53l0x_wrap.c:102:9:VL_get_measurement_if_ready	48	static
+vl53l0x_wrap.c:124:9:VL_get_measurement	48	static
+vl53l0x_wrap.c:141:9:VL_start_measurement_non_blocking	16	static
+vl53l0x_wrap.c:146:9:VL_stop_measurment	16	static
+vl53l0x_wrap.c:151:9:VL_single_measurement_blocking	48	static
+vl53l0x_wrap.c:167:6:VL_reset_on	16	static
+vl53l0x_wrap.c:172:9:VL_init_sensor_set_addres	24	static
+vl53l0x_wrap.c:198:15:WaitMeasurementDataReady	32	static
+vl53l0x_wrap.c:224:15:WaitStopCompleted	32	static
+vl53l0x_wrap.c:251:15:rangingTest	72	static
+vl53l0x_wrap.c:344:6:VL53L0X_Measurement	392	static

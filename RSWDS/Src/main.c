@@ -48,7 +48,8 @@
 #include "TFMini.h"
 #include "psd.h"
 #include "timer.h"
-
+#include "vl53l0x/vl53l0x_wrap.h"
+#include "vl53l1x/vl53l1_wrap.h"
 /* USER CODE END Includes */
 
 /* Private variables ---------------------------------------------------------*/
@@ -73,6 +74,127 @@ int _write(int file, char *ptr, int len) {
 	HAL_UART_Transmit(&huart2, (uint8_t*) ptr, len, 50);
 	return len;
 }
+
+#define interruptModeQuestionMark 0 /* If interruptModeQuestionMark = 1 then device working in interrupt mode, else device working in polling mode */
+VL53L1_Dev_t dev;
+VL53L1_DEV Dev = &dev;
+VL53L0X_Dev_t dev2;
+VL53L0X_DEV Dev2 = &dev2;
+int status, status2, ting = 0;
+volatile int VL53L0X_callback_counter, VL53L1X_callback_counter;
+
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
+	if (GPIO_Pin == VL53L0X_INT_Pin) {
+		++VL53L0X_callback_counter;
+	}
+
+	if (GPIO_Pin == VL53L1X_INT_Pin) {
+		++VL53L1X_callback_counter;
+	}
+}
+
+void AutonomousLowPowerRangingTest(void) {
+
+	static VL53L1_RangingMeasurementData_t RangingData;
+	if (ting == 0) {
+		status = VL53L1_WaitDeviceBooted(Dev);
+		status = VL53L1_DataInit(Dev);
+		status = VL53L1_StaticInit(Dev);
+		status = VL53L1_SetPresetMode(Dev, VL53L1_PRESETMODE_AUTONOMOUS);
+		status = VL53L1_SetDistanceMode(Dev, VL53L1_DISTANCEMODE_LONG);
+		status = VL53L1_SetMeasurementTimingBudgetMicroSeconds(Dev, 70000);
+		status = VL53L1_SetInterMeasurementPeriodMilliSeconds(Dev, 400);
+		HAL_Delay(100);
+		status = VL53L1_StartMeasurement(Dev);
+
+		if (status) {
+			printf("VL53L1_StartMeasurement failed \r\n");
+			while (1)
+				;
+		}
+	}
+
+	if (interruptModeQuestionMark == 0) {
+		//do // interrupt mode
+		//{
+		__WFI();
+
+		if (VL53L1X_callback_counter != 0) {
+			VL53L1X_callback_counter = 0;
+			status = VL53L1_GetRangingMeasurementData(Dev, &RangingData);
+			if (status == 0) {
+				printf("VL53L1X: %d,%d,%.2f,%.2f\r\n", RangingData.RangeStatus, RangingData.RangeMilliMeter,
+						RangingData.SignalRateRtnMegaCps / 65536.0, RangingData.AmbientRateRtnMegaCps / 65336.0);
+			}
+			status = VL53L1_ClearInterruptAndStartMeasurement(Dev);
+		}
+		//} while (1);
+	} else {
+		do // polling mode
+		{
+			status = VL53L1_WaitMeasurementDataReady(Dev);
+			if (!status) {
+				status = VL53L1_GetRangingMeasurementData(Dev, &RangingData);
+				if (status == 0) {
+					printf("VL53L1X: %d,%d,%.2f,%.2f\r\n", RangingData.RangeStatus, RangingData.RangeMilliMeter,
+							(RangingData.SignalRateRtnMegaCps / 65536.0), RangingData.AmbientRateRtnMegaCps / 65336.0);
+				}
+				status = VL53L1_ClearInterruptAndStartMeasurement(Dev);
+				break;
+			}
+		} while (1);
+	}
+
+//  return status;
+}
+
+void AutonomousLowPowerRangingTest2(void) {
+
+	static VL53L0X_RangingMeasurementData_t RangingData;
+
+	status2 = VL53L0X_WaitDeviceBooted(Dev2);
+	status2 = VL53L0X_DataInit(Dev2);
+	status2 = VL53L0X_StaticInit(Dev2);
+	status2 = VL53L0X_SetDeviceMode(Dev2, VL53L0X_DEVICEMODE_SINGLE_RANGING);
+	//status = VL53L0X_SetDistanceMode(Dev2, VL53L1_DISTANCEMODE_LONG);
+	status2 = VL53L0X_SetMeasurementTimingBudgetMicroSeconds(Dev2, 33000);
+	//status2 = VL53L0X_SetInterMeasurementPeriodMilliSeconds(Dev2, 100);
+
+	FixPoint1616_t signalLimit = (FixPoint1616_t) (0.1 * 65536);
+	FixPoint1616_t sigmaLimit = (FixPoint1616_t) (60 * 65536);
+
+	status2 = VL53L0X_SetLimitCheckValue(Dev2,
+	VL53L0X_CHECKENABLE_SIGNAL_RATE_FINAL_RANGE, signalLimit);
+
+	status2 = VL53L0X_SetLimitCheckValue(Dev2,
+	VL53L0X_CHECKENABLE_SIGMA_FINAL_RANGE, sigmaLimit);
+
+	status2 = VL53L0X_SetVcselPulsePeriod(Dev2, VL53L0X_VCSEL_PERIOD_PRE_RANGE, 18);
+
+	status2 = VL53L0X_SetVcselPulsePeriod(Dev2, VL53L0X_VCSEL_PERIOD_FINAL_RANGE, 14);
+	status2 = VL53L0X_StartMeasurement(Dev2);
+
+	HAL_Delay(100);
+
+	if (status2) {
+		printf("VL53L0_StartMeasurement failed \r\n");
+		while (1)
+			;
+	}
+
+	if (interruptModeQuestionMark == 0) {
+
+		__WFI();
+
+		status2 = VL53L0X_PerformSingleRangingMeasurement(Dev2, &RangingData);
+		if (status2 == 0) {
+			printf("VL53L0X: %d,%d,%.2f,%.2f\r\n", RangingData.RangeStatus, RangingData.RangeMilliMeter, RangingData.SignalRateRtnMegaCps / 65536.0,
+					RangingData.AmbientRateRtnMegaCps / 65336.0);
+		}
+
+//  return status;
+	}
+}
 /* USER CODE END 0 */
 
 /**
@@ -82,7 +204,6 @@ int _write(int file, char *ptr, int len) {
  */
 int main(void) {
 	/* USER CODE BEGIN 1 */
-
 	/* USER CODE END 1 */
 
 	/* MCU Configuration----------------------------------------------------------*/
@@ -104,10 +225,11 @@ int main(void) {
 	/* Initialize all configured peripherals */
 	MX_GPIO_Init();
 	MX_DMA_Init();
-	MX_USART2_UART_Init();
 	MX_ADC1_Init();
 	MX_I2C1_Init();
 	MX_USART6_UART_Init();
+	MX_I2C3_Init();
+	MX_USART2_UART_Init();
 	/* USER CODE BEGIN 2 */
 	printf("Program has been started\r\n");
 	PSD_init();
@@ -121,32 +243,56 @@ int main(void) {
 
 	/* Infinite loop */
 	/* USER CODE BEGIN WHILE */
+	dev.I2cDevAddr = 0x52;
+	dev.I2cHandle = &hi2c3;
+	dev.comms_speed_khz = 400;
+	dev2.I2cDevAddr = 0x52;
+	dev2.i2c_handle = &hi2c1;
+	dev2.comms_speed_khz = 400;
+
+	uint8_t byteData;
+	uint16_t wordData;
+	VL53L1_RdByte(Dev, 0x010F, &byteData);
+	printf("VL53L1X Model_ID: %02X\n\r", byteData);
+	VL53L1_RdByte(Dev, 0x0110, &byteData);
+	printf("VL53L1X Module_Type: %02X\n\r", byteData);
+	VL53L1_RdWord(Dev, 0x010F, &wordData);
+	printf("VL53L1X: %02X\n\r", wordData);
+
 	while (1) {
-		if (is_locked(0) == false) {
-			PSD_read();
-			stopwatch_on(0);
-		}
-
-		if (is_locked(1) == false) {
-			lidar_read();
-			stopwatch_on(1);
-		}
-
-		printf("values: %d, %d\r\n", PSD_short_value(), PSD_long_value());
-		printf("distance: %d cm\r\n", lidar_distance_cm());
-		printf("strength: %d\r\n", lidar_strength());
-
-		stopwatch_update();
-		HAL_Delay(100);
-		/* USER CODE END WHILE */
-
-		/* USER CODE BEGIN 3 */
-
+		AutonomousLowPowerRangingTest();
+		AutonomousLowPowerRangingTest2();
+		HAL_Delay(300);
 	}
-	PSD_free();
-	lidar_free();
-	stopwatch_free();
-	/* USER CODE END 3 */
+
+	/*
+	 while (1) {
+	 if (is_locked(0) == false) {
+	 PSD_read();
+	 stopwatch_on(0);
+	 }
+
+	 if (is_locked(1) == false) {
+	 lidar_read();
+	 stopwatch_on(1);
+	 }
+
+	 //printf("values: %d, %d\r\n", PSD_short_value(), PSD_long_value());
+	 //printf("distance: %d cm\r\n", lidar_distance_cm());
+	 //printf("strength: %d\r\n", lidar_strength());
+
+
+	 stopwatch_update();
+	 HAL_Delay(0);
+	 /* USER CODE END WHILE */
+
+	/* USER CODE BEGIN 3 */
+	/*
+	 }
+	 PSD_free();
+	 lidar_free();
+	 stopwatch_free();
+	 /* USER CODE END 3 */
 
 }
 
@@ -183,8 +329,7 @@ void SystemClock_Config(void) {
 
 	/**Initializes the CPU, AHB and APB busses clocks
 	 */
-	RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK | RCC_CLOCKTYPE_SYSCLK
-			| RCC_CLOCKTYPE_PCLK1 | RCC_CLOCKTYPE_PCLK2;
+	RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK | RCC_CLOCKTYPE_SYSCLK | RCC_CLOCKTYPE_PCLK1 | RCC_CLOCKTYPE_PCLK2;
 	RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
 	RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
 	RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV2;

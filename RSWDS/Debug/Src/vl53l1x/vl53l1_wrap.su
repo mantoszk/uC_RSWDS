@@ -1,0 +1,3 @@
+vl53l1_wrap.c:5:9:VL_init_parameters2	24	static
+vl53l1_wrap.c:121:9:VL_single_measurement_blocking2	48	static
+vl53l1_wrap.c:133:9:VL_init_sensor_set_addres2	24	static

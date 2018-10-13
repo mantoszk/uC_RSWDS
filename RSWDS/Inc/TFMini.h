@@ -3,7 +3,7 @@
 #include "defines.h"
 #include "usart.h"
 
-static uint8_t number_of_characters = 9;
+static number_of_characters = 9;
 uint8_t *lidar_raw_values;
 
 bool lidar_init();
