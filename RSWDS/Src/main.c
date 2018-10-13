@@ -104,7 +104,6 @@ void AutonomousLowPowerRangingTest(void) {
 		status = VL53L1_SetDistanceMode(Dev, VL53L1_DISTANCEMODE_LONG);
 		status = VL53L1_SetMeasurementTimingBudgetMicroSeconds(Dev, 70000);
 		status = VL53L1_SetInterMeasurementPeriodMilliSeconds(Dev, 400);
-		HAL_Delay(100);
 		status = VL53L1_StartMeasurement(Dev);
 
 		if (status) {
@@ -174,7 +173,6 @@ void AutonomousLowPowerRangingTest2(void) {
 	status2 = VL53L0X_SetVcselPulsePeriod(Dev2, VL53L0X_VCSEL_PERIOD_FINAL_RANGE, 14);
 	status2 = VL53L0X_StartMeasurement(Dev2);
 
-	HAL_Delay(100);
 
 	if (status2) {
 		printf("VL53L0_StartMeasurement failed \r\n");
@@ -182,9 +180,8 @@ void AutonomousLowPowerRangingTest2(void) {
 			;
 	}
 
-	if (interruptModeQuestionMark == 0) {
 
-		__WFI();
+
 
 		status2 = VL53L0X_PerformSingleRangingMeasurement(Dev2, &RangingData);
 		if (status2 == 0) {
@@ -193,7 +190,7 @@ void AutonomousLowPowerRangingTest2(void) {
 		}
 
 //  return status;
-	}
+
 }
 /* USER CODE END 0 */
 
@@ -262,6 +259,7 @@ int main(void) {
 	while (1) {
 		AutonomousLowPowerRangingTest();
 		AutonomousLowPowerRangingTest2();
+		//VL53L0X_Measurement();
 		HAL_Delay(300);
 	}
 
