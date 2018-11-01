@@ -103,7 +103,7 @@ void AutonomousLowPowerRangingTest(void) {
 		status = VL53L1_SetPresetMode(Dev, VL53L1_PRESETMODE_AUTONOMOUS);
 		status = VL53L1_SetDistanceMode(Dev, VL53L1_DISTANCEMODE_LONG);
 		status = VL53L1_SetMeasurementTimingBudgetMicroSeconds(Dev, 70000);
-		status = VL53L1_SetInterMeasurementPeriodMilliSeconds(Dev, 400);
+		status = VL53L1_SetInterMeasurementPeriodMilliSeconds(Dev, 200);
 		status = VL53L1_StartMeasurement(Dev);
 
 		if (status) {
@@ -122,12 +122,14 @@ void AutonomousLowPowerRangingTest(void) {
 			VL53L1X_callback_counter = 0;
 			status = VL53L1_GetRangingMeasurementData(Dev, &RangingData);
 			if (status == 0) {
+				if(RangingData.RangeMilliMeter < 5000)
 				printf("VL53L1X: %d,%d,%.2f,%.2f\r\n", RangingData.RangeStatus, RangingData.RangeMilliMeter,
 						RangingData.SignalRateRtnMegaCps / 65536.0, RangingData.AmbientRateRtnMegaCps / 65336.0);
 			}
 			status = VL53L1_ClearInterruptAndStartMeasurement(Dev);
 		}
 		//} while (1);
+		/*
 	} else {
 		do // polling mode
 		{
@@ -135,6 +137,7 @@ void AutonomousLowPowerRangingTest(void) {
 			if (!status) {
 				status = VL53L1_GetRangingMeasurementData(Dev, &RangingData);
 				if (status == 0) {
+					if(RangingData.RangeMilliMeter < 5000)
 					printf("VL53L1X: %d,%d,%.2f,%.2f\r\n", RangingData.RangeStatus, RangingData.RangeMilliMeter,
 							(RangingData.SignalRateRtnMegaCps / 65536.0), RangingData.AmbientRateRtnMegaCps / 65336.0);
 				}
@@ -142,55 +145,49 @@ void AutonomousLowPowerRangingTest(void) {
 				break;
 			}
 		} while (1);
+		 */
 	}
-
-//  return status;
 }
+
 
 void AutonomousLowPowerRangingTest2(void) {
 
 	static VL53L0X_RangingMeasurementData_t RangingData;
+	if (ting == 0) {
+		status2 = VL53L0X_WaitDeviceBooted(Dev2);
+		status2 = VL53L0X_DataInit(Dev2);
+		status2 = VL53L0X_StaticInit(Dev2);
+		status2 = VL53L0X_SetDeviceMode(Dev2, VL53L0X_DEVICEMODE_SINGLE_RANGING);
+		//status = VL53L0X_SetDistanceMode(Dev2, VL53L1_DISTANCEMODE_LONG);
+		status2 = VL53L0X_SetMeasurementTimingBudgetMicroSeconds(Dev2, 33000);
+		status2 = VL53L0X_SetInterMeasurementPeriodMilliSeconds(Dev2, 200);
 
-	status2 = VL53L0X_WaitDeviceBooted(Dev2);
-	status2 = VL53L0X_DataInit(Dev2);
-	status2 = VL53L0X_StaticInit(Dev2);
-	status2 = VL53L0X_SetDeviceMode(Dev2, VL53L0X_DEVICEMODE_SINGLE_RANGING);
-	//status = VL53L0X_SetDistanceMode(Dev2, VL53L1_DISTANCEMODE_LONG);
-	status2 = VL53L0X_SetMeasurementTimingBudgetMicroSeconds(Dev2, 33000);
-	//status2 = VL53L0X_SetInterMeasurementPeriodMilliSeconds(Dev2, 100);
+		FixPoint1616_t signalLimit = (FixPoint1616_t) (0.1 * 65536);
+		FixPoint1616_t sigmaLimit = (FixPoint1616_t) (60 * 65536);
 
-	FixPoint1616_t signalLimit = (FixPoint1616_t) (0.1 * 65536);
-	FixPoint1616_t sigmaLimit = (FixPoint1616_t) (60 * 65536);
+		status2 = VL53L0X_SetLimitCheckValue(Dev2,
+		VL53L0X_CHECKENABLE_SIGNAL_RATE_FINAL_RANGE, signalLimit);
 
-	status2 = VL53L0X_SetLimitCheckValue(Dev2,
-	VL53L0X_CHECKENABLE_SIGNAL_RATE_FINAL_RANGE, signalLimit);
+		status2 = VL53L0X_SetLimitCheckValue(Dev2,
+		VL53L0X_CHECKENABLE_SIGMA_FINAL_RANGE, sigmaLimit);
 
-	status2 = VL53L0X_SetLimitCheckValue(Dev2,
-	VL53L0X_CHECKENABLE_SIGMA_FINAL_RANGE, sigmaLimit);
+		status2 = VL53L0X_SetVcselPulsePeriod(Dev2, VL53L0X_VCSEL_PERIOD_PRE_RANGE, 18);
 
-	status2 = VL53L0X_SetVcselPulsePeriod(Dev2, VL53L0X_VCSEL_PERIOD_PRE_RANGE, 18);
+		status2 = VL53L0X_SetVcselPulsePeriod(Dev2, VL53L0X_VCSEL_PERIOD_FINAL_RANGE, 14);
 
-	status2 = VL53L0X_SetVcselPulsePeriod(Dev2, VL53L0X_VCSEL_PERIOD_FINAL_RANGE, 14);
-	status2 = VL53L0X_StartMeasurement(Dev2);
-
-
-	if (status2) {
-		printf("VL53L0_StartMeasurement failed \r\n");
-		while (1)
-			;
-	}
-
-
-
-
-		status2 = VL53L0X_PerformSingleRangingMeasurement(Dev2, &RangingData);
-		if (status2 == 0) {
-			printf("VL53L0X: %d,%d,%.2f,%.2f\r\n", RangingData.RangeStatus, RangingData.RangeMilliMeter, RangingData.SignalRateRtnMegaCps / 65536.0,
-					RangingData.AmbientRateRtnMegaCps / 65336.0);
+		if (status2) {
+			printf("VL53L0_StartMeasurement failed \r\n");
+			while (1)
+				;
 		}
-
-//  return status;
-
+	}
+	status2 = VL53L0X_PerformSingleRangingMeasurement(Dev2, &RangingData);
+	if (status2 == 0) {
+		if(RangingData.RangeMilliMeter < 3000)
+		printf("VL53L0X: %d,%d,%.2f,%.2f\r\n", RangingData.RangeStatus, RangingData.RangeMilliMeter, RangingData.SignalRateRtnMegaCps / 65536.0,
+				RangingData.AmbientRateRtnMegaCps / 65336.0);
+	}
+	VL53L0X_ClearInterruptMask(Dev2,0);
 }
 /* USER CODE END 0 */
 
@@ -260,7 +257,8 @@ int main(void) {
 		AutonomousLowPowerRangingTest();
 		AutonomousLowPowerRangingTest2();
 		//VL53L0X_Measurement();
-		HAL_Delay(300);
+		HAL_Delay(100);
+		++ting;
 	}
 
 	/*
