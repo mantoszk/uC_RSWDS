@@ -31,6 +31,10 @@ uint16_t PSD_short_value() {
 	return psd_raw_values[0];
 }
 
-uint16_t PSD_long_value() {
+uint16_t PSD_short2_value() {
 	return psd_raw_values[1];
+}
+
+uint16_t PSD_long_value() {
+	return psd_raw_values[2];
 }

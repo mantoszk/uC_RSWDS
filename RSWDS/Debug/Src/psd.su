@@ -2,4 +2,5 @@ psd.c:3:6:PSD_init	8	static
 psd.c:14:6:PSD_free	8	static
 psd.c:24:6:PSD_read	8	static
 psd.c:30:10:PSD_short_value	4	static
-psd.c:34:10:PSD_long_value	4	static
+psd.c:34:10:PSD_short2_value	4	static
+psd.c:38:10:PSD_long_value	4	static

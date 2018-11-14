@@ -48,8 +48,8 @@
 #include "TFMini.h"
 #include "psd.h"
 #include "timer.h"
-#include "vl53l0x/vl53l0x_wrap.h"
-#include "vl53l1x/vl53l1_wrap.h"
+#include "VL53L0X.h"
+#include "VL53L1X.h"
 /* USER CODE END Includes */
 
 /* Private variables ---------------------------------------------------------*/
@@ -75,120 +75,12 @@ int _write(int file, char *ptr, int len) {
 	return len;
 }
 
-#define interruptModeQuestionMark 0 /* If interruptModeQuestionMark = 1 then device working in interrupt mode, else device working in polling mode */
-VL53L1_Dev_t dev;
-VL53L1_DEV Dev = &dev;
-VL53L0X_Dev_t dev2;
-VL53L0X_DEV Dev2 = &dev2;
-int status, status2, ting = 0;
-volatile int VL53L0X_callback_counter, VL53L1X_callback_counter;
-
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
-	if (GPIO_Pin == VL53L0X_INT_Pin) {
-		++VL53L0X_callback_counter;
-	}
-
 	if (GPIO_Pin == VL53L1X_INT_Pin) {
 		++VL53L1X_callback_counter;
 	}
 }
 
-void AutonomousLowPowerRangingTest(void) {
-
-	static VL53L1_RangingMeasurementData_t RangingData;
-	if (ting == 0) {
-		status = VL53L1_WaitDeviceBooted(Dev);
-		status = VL53L1_DataInit(Dev);
-		status = VL53L1_StaticInit(Dev);
-		status = VL53L1_SetPresetMode(Dev, VL53L1_PRESETMODE_AUTONOMOUS);
-		status = VL53L1_SetDistanceMode(Dev, VL53L1_DISTANCEMODE_LONG);
-		status = VL53L1_SetMeasurementTimingBudgetMicroSeconds(Dev, 70000);
-		status = VL53L1_SetInterMeasurementPeriodMilliSeconds(Dev, 200);
-		status = VL53L1_StartMeasurement(Dev);
-
-		if (status) {
-			printf("VL53L1_StartMeasurement failed \r\n");
-			while (1)
-				;
-		}
-	}
-
-	if (interruptModeQuestionMark == 0) {
-		//do // interrupt mode
-		//{
-		__WFI();
-
-		if (VL53L1X_callback_counter != 0) {
-			VL53L1X_callback_counter = 0;
-			status = VL53L1_GetRangingMeasurementData(Dev, &RangingData);
-			if (status == 0) {
-				if(RangingData.RangeMilliMeter < 5000)
-				printf("VL53L1X: %d,%d,%.2f,%.2f\r\n", RangingData.RangeStatus, RangingData.RangeMilliMeter,
-						RangingData.SignalRateRtnMegaCps / 65536.0, RangingData.AmbientRateRtnMegaCps / 65336.0);
-			}
-			status = VL53L1_ClearInterruptAndStartMeasurement(Dev);
-		}
-		//} while (1);
-		/*
-	} else {
-		do // polling mode
-		{
-			status = VL53L1_WaitMeasurementDataReady(Dev);
-			if (!status) {
-				status = VL53L1_GetRangingMeasurementData(Dev, &RangingData);
-				if (status == 0) {
-					if(RangingData.RangeMilliMeter < 5000)
-					printf("VL53L1X: %d,%d,%.2f,%.2f\r\n", RangingData.RangeStatus, RangingData.RangeMilliMeter,
-							(RangingData.SignalRateRtnMegaCps / 65536.0), RangingData.AmbientRateRtnMegaCps / 65336.0);
-				}
-				status = VL53L1_ClearInterruptAndStartMeasurement(Dev);
-				break;
-			}
-		} while (1);
-		 */
-	}
-}
-
-
-void AutonomousLowPowerRangingTest2(void) {
-
-	static VL53L0X_RangingMeasurementData_t RangingData;
-	if (ting == 0) {
-		status2 = VL53L0X_WaitDeviceBooted(Dev2);
-		status2 = VL53L0X_DataInit(Dev2);
-		status2 = VL53L0X_StaticInit(Dev2);
-		status2 = VL53L0X_SetDeviceMode(Dev2, VL53L0X_DEVICEMODE_SINGLE_RANGING);
-		//status = VL53L0X_SetDistanceMode(Dev2, VL53L1_DISTANCEMODE_LONG);
-		status2 = VL53L0X_SetMeasurementTimingBudgetMicroSeconds(Dev2, 33000);
-		status2 = VL53L0X_SetInterMeasurementPeriodMilliSeconds(Dev2, 200);
-
-		FixPoint1616_t signalLimit = (FixPoint1616_t) (0.1 * 65536);
-		FixPoint1616_t sigmaLimit = (FixPoint1616_t) (60 * 65536);
-
-		status2 = VL53L0X_SetLimitCheckValue(Dev2,
-		VL53L0X_CHECKENABLE_SIGNAL_RATE_FINAL_RANGE, signalLimit);
-
-		status2 = VL53L0X_SetLimitCheckValue(Dev2,
-		VL53L0X_CHECKENABLE_SIGMA_FINAL_RANGE, sigmaLimit);
-
-		status2 = VL53L0X_SetVcselPulsePeriod(Dev2, VL53L0X_VCSEL_PERIOD_PRE_RANGE, 18);
-
-		status2 = VL53L0X_SetVcselPulsePeriod(Dev2, VL53L0X_VCSEL_PERIOD_FINAL_RANGE, 14);
-
-		if (status2) {
-			printf("VL53L0_StartMeasurement failed \r\n");
-			while (1)
-				;
-		}
-	}
-	status2 = VL53L0X_PerformSingleRangingMeasurement(Dev2, &RangingData);
-	if (status2 == 0) {
-		if(RangingData.RangeMilliMeter < 3000)
-		printf("VL53L0X: %d,%d,%.2f,%.2f\r\n", RangingData.RangeStatus, RangingData.RangeMilliMeter, RangingData.SignalRateRtnMegaCps / 65536.0,
-				RangingData.AmbientRateRtnMegaCps / 65336.0);
-	}
-	VL53L0X_ClearInterruptMask(Dev2,0);
-}
 /* USER CODE END 0 */
 
 /**
@@ -229,67 +121,34 @@ int main(void) {
 	PSD_init();
 	lidar_init();
 	stopwatch_init();
-
-	set_stopwatch_blocking_time(0, 0);
-	set_stopwatch_blocking_time(1, 0);
+	//my_VL53L0X_init();
+	//my_VL53L1X_init();
 
 	/* USER CODE END 2 */
 
 	/* Infinite loop */
 	/* USER CODE BEGIN WHILE */
-	dev.I2cDevAddr = 0x52;
-	dev.I2cHandle = &hi2c3;
-	dev.comms_speed_khz = 400;
-	dev2.I2cDevAddr = 0x52;
-	dev2.i2c_handle = &hi2c1;
-	dev2.comms_speed_khz = 400;
-
-	uint8_t byteData;
-	uint16_t wordData;
-	VL53L1_RdByte(Dev, 0x010F, &byteData);
-	printf("VL53L1X Model_ID: %02X\n\r", byteData);
-	VL53L1_RdByte(Dev, 0x0110, &byteData);
-	printf("VL53L1X Module_Type: %02X\n\r", byteData);
-	VL53L1_RdWord(Dev, 0x010F, &wordData);
-	printf("VL53L1X: %02X\n\r", wordData);
 
 	while (1) {
-		AutonomousLowPowerRangingTest();
-		AutonomousLowPowerRangingTest2();
-		//VL53L0X_Measurement();
+		PSD_read();
+		lidar_read();
+		//my_VL53L0X_read();
+		//my_VL53L1X_read();
+
+		printf("PSD values: %d, %d, %d\r\n", PSD_short_value(), PSD_short2_value(), PSD_long_value());
+		printf("LIDAR value: %d cm\r\n", lidar_distance_cm());
+		//printf("VL53L0X value: %d mm\r\n", my_VL53L0X_distance_mm());
+		//printf("VL53L1X value: %d mm\r\n", my_VL53L1X_distance_mm());
+
 		HAL_Delay(100);
-		++ting;
+		/* USER CODE END WHILE */
+
+		/* USER CODE BEGIN 3 */
 	}
-
-	/*
-	 while (1) {
-	 if (is_locked(0) == false) {
-	 PSD_read();
-	 stopwatch_on(0);
-	 }
-
-	 if (is_locked(1) == false) {
-	 lidar_read();
-	 stopwatch_on(1);
-	 }
-
-	 //printf("values: %d, %d\r\n", PSD_short_value(), PSD_long_value());
-	 //printf("distance: %d cm\r\n", lidar_distance_cm());
-	 //printf("strength: %d\r\n", lidar_strength());
-
-
-	 stopwatch_update();
-	 HAL_Delay(0);
-	 /* USER CODE END WHILE */
-
-	/* USER CODE BEGIN 3 */
-	/*
-	 }
-	 PSD_free();
-	 lidar_free();
-	 stopwatch_free();
-	 /* USER CODE END 3 */
-
+	PSD_free();
+	lidar_free();
+	stopwatch_free();
+	/* USER CODE END 3 */
 }
 
 /**
