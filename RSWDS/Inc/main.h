@@ -50,12 +50,50 @@
 
 /* Private define ------------------------------------------------------------*/
 
+#define SHARP_SMALL_1_ADC_Pin GPIO_PIN_0
+#define SHARP_SMALL_1_ADC_GPIO_Port GPIOC
+#define SHARP_SMALL_2_ADC_Pin GPIO_PIN_1
+#define SHARP_SMALL_2_ADC_GPIO_Port GPIOC
+#define SHARP_BIG_ADC_Pin GPIO_PIN_2
+#define SHARP_BIG_ADC_GPIO_Port GPIOC
+#define PC_DEBUG_TX_Pin GPIO_PIN_2
+#define PC_DEBUG_TX_GPIO_Port GPIOA
+#define PC_DEBUG_RX_Pin GPIO_PIN_3
+#define PC_DEBUG_RX_GPIO_Port GPIOA
 #define VL53L1X_INT_Pin GPIO_PIN_4
 #define VL53L1X_INT_GPIO_Port GPIOA
 #define VL53L1X_INT_EXTI_IRQn EXTI4_IRQn
 #define VL53L0X_INT_Pin GPIO_PIN_5
 #define VL53L0X_INT_GPIO_Port GPIOA
 #define VL53L0X_INT_EXTI_IRQn EXTI9_5_IRQn
+#define VL53L1X_trigger_Pin GPIO_PIN_13
+#define VL53L1X_trigger_GPIO_Port GPIOB
+#define TFMini_TX_Pin GPIO_PIN_6
+#define TFMini_TX_GPIO_Port GPIOC
+#define TFMini_RX_Pin GPIO_PIN_7
+#define TFMini_RX_GPIO_Port GPIOC
+#define VL53L1X_SDA_Pin GPIO_PIN_9
+#define VL53L1X_SDA_GPIO_Port GPIOC
+#define VL53L1X_SCL_Pin GPIO_PIN_8
+#define VL53L1X_SCL_GPIO_Port GPIOA
+#define ROTATION_TX_Pin GPIO_PIN_9
+#define ROTATION_TX_GPIO_Port GPIOA
+#define ROTATION_RX_Pin GPIO_PIN_10
+#define ROTATION_RX_GPIO_Port GPIOA
+#define VL53L0X_trigger_Pin GPIO_PIN_11
+#define VL53L0X_trigger_GPIO_Port GPIOA
+#define LASER_Pin GPIO_PIN_12
+#define LASER_GPIO_Port GPIOA
+#define SONAR_SCK_Pin GPIO_PIN_10
+#define SONAR_SCK_GPIO_Port GPIOC
+#define SONAR_MISO_Pin GPIO_PIN_11
+#define SONAR_MISO_GPIO_Port GPIOC
+#define SONAR_MOSI_Pin GPIO_PIN_12
+#define SONAR_MOSI_GPIO_Port GPIOC
+#define VL53L0X_SCL_Pin GPIO_PIN_8
+#define VL53L0X_SCL_GPIO_Port GPIOB
+#define VL53L0X_SDA_Pin GPIO_PIN_9
+#define VL53L0X_SDA_GPIO_Port GPIOB
 
 /* ########################## Assert Selection ############################## */
 /**

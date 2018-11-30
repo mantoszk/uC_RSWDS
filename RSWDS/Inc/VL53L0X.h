@@ -7,7 +7,6 @@
 
 static VL53L0X_Dev_t dev_VL53L0X;
 static VL53L0X_DEV Dev0 = &dev_VL53L0X;
-static int VL53L0X_callback_counter = 0;
 static int	VL53L0X_status = 0;
 
 static VL53L0X_RangingMeasurementData_t VL53L0X_RangingData;

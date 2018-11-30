@@ -1,4 +1,4 @@
-VL53L0X.c:3:6:my_VL53L0X_init	16	static
-VL53L0X.c:35:6:my_VL53L0X_read	40	static
-VL53L0X.c:48:10:my_VL53L0X_distance_mm	4	static
-VL53L0X.c:53:7:my_VL53L0X_distance_m	4	static
+VL53L0X.c:3:6:my_VL53L0X_init	24	static
+VL53L0X.c:42:6:my_VL53L0X_read	8	static
+VL53L0X.c:53:10:my_VL53L0X_distance_mm	4	static
+VL53L0X.c:61:7:my_VL53L0X_distance_m	4	static

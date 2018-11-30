@@ -30,31 +30,31 @@ bool my_VL53L1X_read() {
 		if (VL53L1X_callback_counter != 0) {
 			VL53L1X_callback_counter = 0;
 			VL53L1X_status = VL53L1_GetRangingMeasurementData(Dev1, &VL53L1X_RangingData);
-			if (VL53L1X_status == 0) {
-				if (VL53L1X_RangingData.RangeMilliMeter < 5000)
-					printf("VL53L1X: %d,%d,%.2f,%.2f\r\n", VL53L1X_RangingData.RangeStatus, VL53L1X_RangingData.RangeMilliMeter,
-							VL53L1X_RangingData.SignalRateRtnMegaCps / 65536.0, VL53L1X_RangingData.AmbientRateRtnMegaCps / 65336.0);
-			}
 			VL53L1X_status = VL53L1_ClearInterruptAndStartMeasurement(Dev1);
 		}
 	} else {
 		VL53L1X_status = VL53L1_WaitMeasurementDataReady(Dev1);
 		if (!VL53L1X_status) {
 			VL53L1X_status = VL53L1_GetRangingMeasurementData(Dev1, &VL53L1X_RangingData);
-			if (VL53L1X_status == 0) {
-				if (VL53L1X_RangingData.RangeMilliMeter < 5000)
-					printf("VL53L1X: %d,%d,%.2f,%.2f\r\n", VL53L1X_RangingData.RangeStatus, VL53L1X_RangingData.RangeMilliMeter,
-							(VL53L1X_RangingData.SignalRateRtnMegaCps / 65536.0), VL53L1X_RangingData.AmbientRateRtnMegaCps / 65336.0);
-			}
 			VL53L1X_status = VL53L1_ClearInterruptAndStartMeasurement(Dev1);
 		}
 	}
+
+	if(VL53L1X_status == VL53L1_ERROR_NONE)
+		return true;
+	else
+		return false;
 }
 
 uint16_t my_VL53L1X_distance_mm() {
-	return VL53L1X_RangingData.RangeMilliMeter;
+	if(VL53L1X_RangingData.RangeMilliMeter < 5000)
+		return VL53L1X_RangingData.RangeMilliMeter;
+	else
+		return -1;
 }
 
 float my_VL53L1X_distance_m() {
-	return VL53L1X_RangingData.RangeMilliMeter / 1000;
-}
+	if(VL53L1X_RangingData.RangeMilliMeter < 5000)
+		return VL53L1X_RangingData.RangeMilliMeter/1000;
+	else
+		return -1;}
