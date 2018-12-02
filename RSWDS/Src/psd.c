@@ -35,6 +35,18 @@ uint16_t PSD_short2_value() {
 	return psd_raw_values[1];
 }
 
-uint16_t PSD_long_value() {
+uint16_t PSD_big_value() {
 	return psd_raw_values[2];
+}
+
+uint16_t PSD_short_distance_cm(float a, float b) {
+	return (uint16_t) ((a/psd_raw_values[0])-b);
+}
+
+uint16_t PSD_short2_distance_cm(float a, float b) {
+	return (uint16_t) ((a/psd_raw_values[1])-b);
+}
+
+uint16_t PSD_big_distance_cm(float a, float b) {
+	return (uint16_t) ((a/psd_raw_values[2])-b);
 }

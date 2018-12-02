@@ -1,6 +1,6 @@
 TFMini.c:3:6:lidar_init	8	static
 TFMini.c:14:6:lidar_free	8	static
 TFMini.c:24:6:lidar_read	16	static
-TFMini.c:51:10:lidar_distance_cm	4	static
-TFMini.c:56:7:lidar_distance_m	4	static
+TFMini.c:53:10:lidar_distance_cm	4	static
+TFMini.c:57:7:lidar_distance_m	4	static
 TFMini.c:61:10:lidar_strength	4	static

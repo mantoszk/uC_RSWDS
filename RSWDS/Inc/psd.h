@@ -12,5 +12,8 @@ void PSD_read();
 
 uint16_t PSD_short_value();
 uint16_t PSD_short2_value();
-uint16_t PSD_long_value();
+uint16_t PSD_big_value();
+uint16_t PSD_short_distance_cm(float a, float b);
+uint16_t PSD_short2_distance_cm(float a, float b);
+uint16_t PSD_big_distance_cm(float a, float b);
 #endif
