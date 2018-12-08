@@ -1,0 +1,8 @@
+debug.c:3:6:trace	16	static
+debug.c:8:6:set_trace_level_critical	4	static
+debug.c:12:6:set_trace_level_positive	4	static
+debug.c:16:6:set_trace_level_output_only	4	static
+debug.c:20:6:set_output_type_human	4	static
+debug.c:25:6:set_output_type_machine	4	static
+debug.c:30:6:set_psd_value_raw	4	static
+debug.c:35:6:set_psd_value_si	4	static

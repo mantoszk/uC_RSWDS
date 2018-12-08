@@ -1,0 +1,4 @@
+VL53L1.c:3:6:my_VL53L1_init	8	static
+VL53L1.c:26:6:my_VL53L1_read	8	static
+VL53L1.c:52:10:my_VL53L1_distance_mm	4	static
+VL53L1.c:59:7:my_VL53L1_distance_m	4	static

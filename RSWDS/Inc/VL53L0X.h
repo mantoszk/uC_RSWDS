@@ -4,6 +4,7 @@
 #include "defines.h"
 #include "i2c.h"
 #include "vl53l0x/vl53l0x_api.h"
+#include "debug.h"
 
 static VL53L0X_Dev_t dev_VL53L0X;
 static VL53L0X_DEV Dev0 = &dev_VL53L0X;

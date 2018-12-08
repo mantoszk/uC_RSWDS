@@ -2,6 +2,7 @@
 #define TFMINI_H_
 #include "defines.h"
 #include "usart.h"
+#include "debug.h"
 
 static number_of_characters = 9;
 uint8_t *lidar_raw_values;
